@@ -106,26 +106,33 @@ const ModeWrapper = memo(function ModeWrapper({
 
   return (
     <>
-      {createPortal(children, scene)}
+      {/* Render children and the glass mesh into the buffer scene */}
+      {createPortal(
+        <>
+          {children}
+          <mesh 
+            ref={ref} 
+            scale={scale ?? 0.15} 
+            rotation-x={geometryType === 'lens' ? Math.PI / 2 : 0} 
+            geometry={geometry} 
+            {...props}
+          >
+            <MeshTransmissionMaterial
+              buffer={buffer.texture}
+              ior={ior ?? 1.15}
+              thickness={thickness ?? 5}
+              anisotropy={anisotropy ?? 0.01}
+              chromaticAberration={chromaticAberration ?? 0.1}
+              {...extraMat}
+            />
+          </mesh>
+        </>,
+        scene
+      )}
+      {/* Show the buffer texture in the main scene */}
       <mesh scale={[vp.width, vp.height, 1]}>
         <planeGeometry />
         <meshBasicMaterial map={buffer.texture} transparent />
-      </mesh>
-      <mesh 
-        ref={ref} 
-        scale={scale ?? 0.15} 
-        rotation-x={geometryType === 'lens' ? Math.PI / 2 : 0} 
-        geometry={geometry} 
-        {...props}
-      >
-        <MeshTransmissionMaterial
-          buffer={buffer.texture}
-          ior={ior ?? 1.15}
-          thickness={thickness ?? 5}
-          anisotropy={anisotropy ?? 0.01}
-          chromaticAberration={chromaticAberration ?? 0.1}
-          {...extraMat}
-        />
       </mesh>
     </>
   );
@@ -244,13 +251,13 @@ function CatImages() {
     });
   });
 
-  // Using placeholder cat images from placekitten (or similar)
+  // Use beautiful Unsplash cat images
   const catImages = [
-    'https://placecats.com/millie/800/600',
-    'https://placecats.com/bella/600/600',
-    'https://placecats.com/neo_banana/600/800',
-    'https://placecats.com/millie/400/300',
-    'https://placecats.com/bella/500/500'
+    'https://loremflickr.com/801/600/cat,kitty,kitten,orange,black,tabby,siamese',
+    'https://loremflickr.com/600/601/cat,kitty,kitten,orange,black,tabby,siamese',
+    'https://loremflickr.com/602/800/cat,kitty,kitten,orange,black,tabby,siamese',
+    'https://loremflickr.com/400/302/cat,kitty,kitten,orange,black,tabby,siamese',
+    'https://loremflickr.com/503/500/cat,kitty,kitten,orange,black,tabby,siamese'
   ];
 
   return (
@@ -266,9 +273,9 @@ function CatImages() {
 
 function Typography({ content }) {
   const DEVICE = {
-    mobile: { fontSize: 0.15, subFontSize: 0.06 },
-    tablet: { fontSize: 0.3, subFontSize: 0.1 },
-    desktop: { fontSize: 0.45, subFontSize: 0.12 }
+    mobile: { fontSize: 0.09, subFontSize: 0.045 },
+    tablet: { fontSize: 0.18, subFontSize: 0.08 },
+    desktop: { fontSize: 0.28, subFontSize: 0.09 }
   };
   const getDevice = () => {
     const w = window.innerWidth;
@@ -293,7 +300,7 @@ function Typography({ content }) {
 
   return (
     <group>
-      {/* Main Title */}
+      {/* Main Title - centered */}
       <Text
         position={[0, 0.3, 12]}
         fontSize={fontSize}
@@ -308,8 +315,8 @@ function Typography({ content }) {
       >
         {mainText}
       </Text>
-      
-      {/* Subtitle */}
+
+      {/* Subtitle - remains centered */}
       <Text
         position={[0, -0.1, 12]}
         fontSize={subFontSize}
@@ -325,9 +332,9 @@ function Typography({ content }) {
         {subText}
       </Text>
 
-      {/* Middle section message */}
+      {/* Middle section message - moved slightly up */}
       <Text
-        position={[0, -height + 0.5, 12]}
+        position={[0, -height * 1.0, 12]}
         fontSize={fontSize * 0.7}
         letterSpacing={-0.02}
         outlineWidth={0}
@@ -341,7 +348,7 @@ function Typography({ content }) {
         {message}
       </Text>
 
-      {/* Bottom text */}
+      {/* Bottom text - remains centered */}
       <Text
         position={[0, -height * 2 + 0.5, 12]}
         fontSize={fontSize * 0.6}
